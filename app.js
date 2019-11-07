@@ -9,6 +9,8 @@ const mongoose = require('mongoose');
 
 const router = require('./routes/users.js');
 
+const { login, createUser } = require('./controllers/users');
+
 const routerCards = require('./routes/cards.js');
 
 const { PORT = 3000 } = process.env;
@@ -34,6 +36,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/users', bodyParser.json(), router);
 app.post('/cards', bodyParser.json(), routerCards);
 app.use('/users', router);
+app.post('/signin', bodyParser.json(), login);
+app.post('/signup', bodyParser.json(), createUser);
 app.use('/cards', routerCards);
 app.use((req, res) => {
   res.status(404).json({ "message": "Запрашиваемый ресурс не найден" });
