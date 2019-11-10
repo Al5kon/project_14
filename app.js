@@ -1,48 +1,42 @@
-/* eslint-disable quotes */
-/* eslint-disable quote-props */
 const express = require('express');
 const bodyParser = require('body-parser');
-
-const path = require('path');
-
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
-const router = require('./routes/users.js');
+const auth = require('./middlewares/auth');
 
 const { login, createUser } = require('./controllers/users');
-
-const routerCards = require('./routes/cards.js');
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
+const router = require('./routes/index.js');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
   useUnifiedTopology: true,
-})
-  .then(() => console.log('Hi'))
-  .catch((e) => console.log(e));
-
-app.use('/cards', (req, res, next) => {
-  req.user = {
-    _id: '5db32846fa0a50463eb2acf0',
-  };
-  next();
 });
-app.use(express.static(path.join(__dirname, 'public')));
-app.post('/users', bodyParser.json(), router);
-app.post('/cards', bodyParser.json(), routerCards);
-app.use('/users', router);
-app.post('/signin', bodyParser.json(), login);
-app.post('/signup', bodyParser.json(), createUser);
-app.use('/cards', routerCards);
+const limiter = rateLimit({
+  windowMs: 15 * 50 * 1000,
+  max: 100,
+});
+app.use(limiter);
+app.use(helmet());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+// app.use(express.static(path.join(__dirname, 'public')));
+app.post('/signup', createUser);
+app.post('/signin', login);
+
+app.use(auth);
+app.use('/', router);
 app.use((req, res) => {
-  res.status(404).json({ "message": "Запрашиваемый ресурс не найден" });
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+app.listen(PORT);

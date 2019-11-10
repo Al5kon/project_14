@@ -1,10 +1,4 @@
-/* eslint-disable arrow-parens */
-/* eslint-disable object-shorthand */
-/* eslint-disable func-names */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-useless-escape */
 const mongoose = require('mongoose');
-
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
@@ -25,8 +19,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: function (v) {
-        console.log(validator.isURL(v));
+      validator: function Validate(v) {
         return validator.isURL(v);
       },
     },
@@ -34,9 +27,9 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    // unique: true,
+    unique: true,
     validate: {
-      validator: function (v) {
+      validator: function Validate(v) {
         return validator.isEmail(v);
       },
     },
@@ -44,17 +37,18 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    select: false,
   },
 });
 
-userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email })
-    .then(user => {
+userSchema.statics.findUserByCredentials = function FindAndCheck(email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Неправильные почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
-        .then(matched => {
+        .then((matched) => {
           if (!matched) {
             return Promise.reject(new Error('Неправильные почта или пароль'));
           }
