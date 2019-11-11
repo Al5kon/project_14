@@ -12,3 +12,4 @@ Create server
 ### v0.0.5 Add property select
 ### v0.0.6 Fix bugs
 ### v0.0.7 Change Readme
+### v0.0.8 Fix new bugs

@@ -1,10 +1,9 @@
-const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 
-const getUserById = router.get('/:_id', (req, res) => {
+const getUserById = (req, res) => {
   User.findById(req.params._id)
     .then((user) => {
       if (!user) {
@@ -14,9 +13,9 @@ const getUserById = router.get('/:_id', (req, res) => {
       res.send({ data: user });
     })
     .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
-});
+};
 
-const createUser = router.post('/signup', (req, res) => {
+const createUser = (req, res) => {
   const {
     name,
     about,
@@ -35,9 +34,9 @@ const createUser = router.post('/signup', (req, res) => {
       res.status(201).send({ data: user });
     })
     .catch((err) => res.status(400).send({ message: `Произошла ошибка ${err}` }));
-});
+};
 
-const login = router.post('/signin', (req, res) => {
+const login = (req, res) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -49,13 +48,13 @@ const login = router.post('/signin', (req, res) => {
         .status(401)
         .send({ message: err.message });
     });
-});
+};
 
-const findAllUsers = router.get('/', (req, res) => {
+const findAllUsers = (req, res) => {
   User.find({})
     .then((user) => res.send({ data: user }))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
-});
+};
 
 module.exports = {
   getUserById,
